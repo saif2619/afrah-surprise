@@ -42,11 +42,11 @@ canvas{position:fixed;inset:0;pointer-events:none;z-index:5}
 <body>
 <canvas id="fx"></canvas>
 <main class="stage">
+
   <section class="screen on" id="intro">
     <div class="face">🎁</div>
     <h1>This is a surprise for you</h1>
     <p class="sub">Afrah, answer honestly. There are no wrong answers 🌸</p>
-    <p style="font-size:14px;margin:0;opacity:.8">Your answers will be shared with me ❤️</p>
     <button class="yes" id="start">Open it</button>
   </section>
 
@@ -75,44 +75,23 @@ canvas{position:fixed;inset:0;pointer-events:none;z-index:5}
       <button class="no" id="no">No</button>
     </div>
   </section>
+
   <section class="screen" id="done">
     <div class="face">🥰</div>
     <h1>She said yes!</h1>
     <p class="sub">Best answer ever. See you soon 💍</p>
   </section>
-  <section class="screen" id="finalNo">
-    <div class="face">🌷</div>
-    <h1 class="q">Thank you for being honest with me ❤️</h1>
-    <p class="sub">Whatever your answer, I respect it.</p>
-  </section>
+
   <section class="screen" id="typed">
     <div class="face">💌</div>
     <h1>Thank you, Afrah</h1>
     <div class="quote" id="said"></div>
-    <p class="sub">Take a screenshot and send it to me 🌸</p>
+    <p class="sub">Take a screenshot and send it to me. I’ll keep it forever 🌸</p>
   </section>
+
 </main>
 <script>
-// IMPORTANT: Paste your deployed Google Apps Script Web App URL (ending in /exec) below.
-const SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL";
-
-function saveAnswer(question, answer) {
-  if (!SCRIPT_URL || SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_URL") {
-    console.warn("Set SCRIPT_URL before publishing. Answer was not submitted.");
-    return;
-  }
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ question: question, answer: answer })
-  }).catch(function(error) {
-    console.error("Answer saving error:", error);
-  });
-}
-
-
-// ---- Questions ----
+// ---- Edit the questions here ----
 var QS=[
  "Can I ask you something a little special? 🌸",
  "Would you mind if I stole a little more of your time every day? 🥹",
@@ -121,100 +100,70 @@ var QS=[
  "If I asked for one date with you, would you let me make it the most beautiful evening of your life? 🌹",
  "If I wanted to be the one who gets to call you my girl, would you let me? 🥺"
 ];
-var REPLY={
- yes:["Yay 🥰","That made me smile 🌸","I hoped you’d say that 🥹","You’re making my heart race 🤭","Best answer 🌹","I’m so happy 🥺"],
- no:["That’s okay 🌸 I’ll still ask the next one","Fair enough 😄 one more","I’ll try again 🥹","Hmm… let me keep going 🤭","That’s okay, I’m patient 🌹","Alright 🥺"],
- say:"Thank you for telling me 🌸"
-};
+var REPLY={yes:["Yay 🥰","That made me smile 🌸","I hoped you’d say that 🥹","You’re making my heart race 🤭","Best answer 🌹","I’m so happy 🥺"],
+           no:["That’s okay 🌸 I’ll still ask the next one","Fair enough 😄 one more","I’ll try again 🥹","Hmm… let me keep going 🤭","That’s okay, I’m patient 🌹","Alright 🥺"],
+           say:"Thank you for telling me 🌸"};
+// ---------------------------------
 var $=function(i){return document.getElementById(i)};
 function show(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on')});$(id).classList.add('on')}
 var cur=0,dots=$('dots');
 for(var d=0;d<7;d++)dots.appendChild(document.createElement('i'));
 function render(){
- for(var d=0;d<7;d++)dots.children[d].classList.toggle('f',d<=cur);
- $('qt').textContent=QS[cur];$('toast').textContent='';
- $('qb').style.display='flex';$('qsay').classList.remove('on');$('qin').value='';
- [].forEach.call($('qb').children,function(b){b.disabled=false});
+  for(var d=0;d<7;d++)dots.children[d].classList.toggle('f',d<=cur);
+  $('qt').textContent=QS[cur];$('toast').textContent='';
+  $('qb').style.display='flex';$('qsay').classList.remove('on');$('qin').value='';
+  [].forEach.call($('qb').children,function(b){b.disabled=false});
 }
 function advance(msg){
- $('toast').textContent=msg;
- [].forEach.call($('qb').children,function(b){b.disabled=true});
- $('qsend').disabled=true;
- setTimeout(function(){
-  $('qsend').disabled=false;cur++;
-  if(cur<QS.length){render()}else{dots.children[6].classList.add('f');show('final')}
- },1300);
+  $('toast').textContent=msg;
+  [].forEach.call($('qb').children,function(b){b.disabled=true});
+  $('qsend').disabled=true;
+  setTimeout(function(){
+    $('qsend').disabled=false;cur++;
+    if(cur<6){render()}else{dots.children[6].classList.add('f');show('final')}
+  },1300);
 }
 $('start').onclick=function(){show('ask');render()};
-$('qy').onclick=function(){saveAnswer(QS[cur],"Yes");advance(REPLY.yes[cur])};
-$('qn').onclick=function(){saveAnswer(QS[cur],"No");advance(REPLY.no[cur])};
+$('qy').onclick=function(){advance(REPLY.yes[cur])};
+$('qn').onclick=function(){advance(REPLY.no[cur])};
 $('qtype').onclick=function(){$('qb').style.display='none';$('qsay').classList.add('on');$('qin').focus()};
-$('qsend').onclick=function(){
- var answer=$('qin').value.trim();if(!answer)return;
- saveAnswer(QS[cur],answer);
- $('qsay').classList.remove('on');advance(REPLY.say);
-};
+$('qsend').onclick=function(){if(!$('qin').value.trim())return;$('qsay').classList.remove('on');advance(REPLY.say)};
 $('qin').addEventListener('keydown',function(e){if(e.key==='Enter')$('qsend').click()});
 
-// Final proposal response
-var yes=$('yes'),no=$('no'),face=$('face');
-yes.onclick = function () {
-  fetch("https://script.google.com/macros/s/AKfycbwJd08BODqbCw3lv0Gfr4RlzuZLAvlHHFFaK57ozaypOkXWSXtPchEFtHsRHAM3Jq6E/exec", {
-    method: "POST",
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "text/plain"
-    },
-    body: JSON.stringify({
-      question: "Will you be my girlfriend?",
-      answer: "Yes ❤️"
-    })
-  });
-
-  no.style.display = 'none';
-  $('ask').classList.remove('on');
-  $('done').classList.add('on');
-  burst();
-  setTimeout(burst, 900);
-};
- saveAnswer("Afrah, will you be my girlfriend?","Yes ❤️");
- no.style.display='none';show('done');burst();setTimeout(burst,900);
-};
-// The No button runs away ONLY on the final proposal screen.
-var noMoves = 0;
-var noLabels = ["No", "Are you sure? 🥺", "Really? 😭", "Think again 💗", "Please? 🥹", "Wait! 💌"];
-function dodgeFinalNo(e){
- if(e) e.preventDefault();
- noMoves++;
- no.textContent = noLabels[Math.min(noMoves, noLabels.length - 1)];
- no.style.position = "fixed";
- no.style.zIndex = "10";
- var margin = 16;
- var maxX = Math.max(margin, window.innerWidth - no.offsetWidth - margin);
- var maxY = Math.max(margin, window.innerHeight - no.offsetHeight - margin);
- no.style.left = (margin + Math.random() * (maxX - margin)) + "px";
- no.style.top = (margin + Math.random() * (maxY - margin)) + "px";
+// final: runaway No
+var n=0,yes=$('yes'),no=$('no'),face=$('face');
+var words=['No','Are you sure?','Really?','Think again','Please?','Just say yes'];
+var faces=['🥺','😳','😢','😭','🥹','😩'];
+function dodge(e){
+  if(e)e.preventDefault();
+  n++;
+  no.textContent=words[Math.min(n,words.length-1)];
+  face.textContent=faces[Math.min(n,faces.length-1)];
+  no.style.position='fixed';no.style.zIndex=3;
+  var m=16,w=no.offsetWidth,h=no.offsetHeight;
+  no.style.left=(m+Math.random()*(innerWidth-w-2*m))+'px';
+  no.style.top=(m+Math.random()*(innerHeight-h-2*m))+'px';
+  yes.style.transform='scale('+Math.min(1+n*0.18,2.4)+')';
+  yes.style.margin=(n*6)+'px';
 }
-no.addEventListener("pointerenter", dodgeFinalNo);
-o.addEventListener("pointerdown", dodgeFinalNo);
-no.onclick=function(){
- saveAnswer("Afrah, will you be my girlfriend?","No");
- show('finalNo');
-};
+no.addEventListener('pointerenter',dodge);
+no.addEventListener('pointerdown',dodge);
+no.addEventListener('click',function(e){e.preventDefault()});
 
-// Celebration hearts
+// celebration
 var cv=$('fx'),cx=cv.getContext('2d'),ps=[];
 function size(){cv.width=innerWidth;cv.height=innerHeight}size();addEventListener('resize',size);
 function burst(){
- for(var i=0;i<140;i++)ps.push({x:innerWidth/2,y:innerHeight*.55,vx:(Math.random()-.5)*14,vy:-Math.random()*16-4,r:16+Math.random()*18,c:['♥','❤','💖','✨'][i%4],life:140+Math.random()*60});
- tick();
+  for(var i=0;i<140;i++)ps.push({x:innerWidth/2,y:innerHeight*.55,vx:(Math.random()-.5)*14,vy:-Math.random()*16-4,r:16+Math.random()*18,c:['♥','❤','💖','✨'][i%4],life:140+Math.random()*60});
+  tick();
 }
 function tick(){
- cx.clearRect(0,0,cv.width,cv.height);
- ps.forEach(function(p){p.vy+=.28;p.x+=p.vx;p.y+=p.vy;p.life--;cx.globalAlpha=Math.max(p.life/60,0);cx.font=p.r+'px serif';cx.fillText(p.c,p.x,p.y)});
- ps=ps.filter(function(p){return p.life>0&&p.y<cv.height+40});
- if(ps.length)requestAnimationFrame(tick);else cx.clearRect(0,0,cv.width,cv.height);
+  cx.clearRect(0,0,cv.width,cv.height);
+  ps.forEach(function(p){p.vy+=.28;p.x+=p.vx;p.y+=p.vy;p.life--;cx.globalAlpha=Math.max(p.life/60,0);cx.font=p.r+'px serif';cx.fillText(p.c,p.x,p.y)});
+  ps=ps.filter(function(p){return p.life>0&&p.y<cv.height+40});
+  if(ps.length)requestAnimationFrame(tick);else cx.clearRect(0,0,cv.width,cv.height);
 }
+yes.onclick=function(){no.style.display='none';show('done');burst();setTimeout(burst,900)};
 </script>
 </body>
 </html>
