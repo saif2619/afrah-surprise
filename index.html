@@ -158,7 +158,25 @@ $('qin').addEventListener('keydown',function(e){if(e.key==='Enter')$('qsend').cl
 
 // Final proposal response
 var yes=$('yes'),no=$('no'),face=$('face');
-yes.onclick=function(){
+yes.onclick = function () {
+  fetch("https://script.google.com/macros/s/AKfycbwJd08BODqbCw3lv0Gfr4RlzuZLAvlHHFFaK57ozaypOkXWSXtPchEFtHsRHAM3Jq6E/exec", {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "text/plain"
+    },
+    body: JSON.stringify({
+      question: "Will you be my girlfriend?",
+      answer: "Yes ❤️"
+    })
+  });
+
+  no.style.display = 'none';
+  $('ask').classList.remove('on');
+  $('done').classList.add('on');
+  burst();
+  setTimeout(burst, 900);
+};
  saveAnswer("Afrah, will you be my girlfriend?","Yes ❤️");
  no.style.display='none';show('done');burst();setTimeout(burst,900);
 };
